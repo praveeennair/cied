@@ -57,15 +57,19 @@ class DeliveryAgentListCreateAPIView(APIView):
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
-            username =  serializer.validated_data.get('user', {}).get('username')
+            username = serializer.validated_data.get(
+                'user', {}).get('username')
             email = serializer.validated_data.get('email')
             password = get_random_string(length=14)
 
             if User.objects.filter(username=username).exists():
-                return general_error_response({"error": "Username already exists"})
+                return general_error_response(
+                    {"error": "Username already exists"}
+                )
 
-            user = User.objects.create_user(username=username, password=password, email=email)
-
+            user = User.objects.create_user(
+                username=username, password=password, email=email
+            )
 
             delivery_agent = DeliveryAgent.objects.create(
                 user=user,
@@ -104,7 +108,8 @@ class DeliveryAgentDetailView(RetrieveUpdateDestroyAPIView):
         user_instance = delivery_agent_instance.user
 
         if 'email' in validated_data or 'username' in validated_data:
-            user_data = {key: validated_data[key] for key in ('email', 'username') if key in validated_data}
+            user_data = {key: validated_data[key] for key in (
+                'email', 'username') if key in validated_data}
 
             if user_instance and user_data:
                 for key, value in user_data.items():
@@ -131,7 +136,7 @@ class CustomerListCreateAPIView(APIView):
             self.permission_classes = []
 
         return super(CustomerListCreateAPIView, self).get_permissions()
-    
+
     def get(self, request):
         customers = Customer.objects.all()
         serializer = CustomerListSerializer(customers, many=True)
@@ -140,13 +145,18 @@ class CustomerListCreateAPIView(APIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            username =  serializer.validated_data.get('user', {}).get('username')
+            username = serializer.validated_data.get(
+                'user', {}).get('username')
             email = serializer.validated_data.get('email')
             password = get_random_string(length=14)
             if User.objects.filter(username=username).exists():
-                return general_error_response({"error": "Username already exists"})
+                return general_error_response(
+                    {"error": "Username already exists"}
+                )
 
-            user = User.objects.create_user(username=username, password=password, email=email)
+            user = User.objects.create_user(
+                username=username, password=password, email=email
+            )
             customer = Customer.objects.create(
                 email=email,
                 user=user,
@@ -180,7 +190,7 @@ class BlockCustomerAPIView(APIView):
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
-            customer.is_blocked=serializer.validated_data.get('is_blocked')
+            customer.is_blocked = serializer.validated_data.get('is_blocked')
             customer.save()
             return success_response(serializer.data)
         return general_error_response(Errormessages.FAILED)
@@ -196,13 +206,14 @@ class DeleteCustomerAPIView(APIView):
 
         if not customer:
             return not_found_response(Errormessages.NOT_FOUND)
-        
+
         pending_orders = Order.objects.all().exclude(
-            status__in=(OrderStatus.DELIVERED, OrderStatus.CANCELLED)
-        ).exists()
+            status__in=(
+                OrderStatus.DELIVERED, OrderStatus.CANCELLED
+            )).exists()
         if not pending_orders:
             customer.is_active = False
-            customer.user.is_active=False
+            customer.user.is_active = False
             customer.save()
 
             return success_response({'id': pk})
@@ -225,12 +236,12 @@ class UpdateDeliveryStatusAPIView(APIView):
 
         if not otp_request():
             return general_error_response(Errormessages.FAILED)
-        
+
         serializer = self.serializer_class(data=request.data)
 
         if not serializer.is_valid():
             return general_error_response(Errormessages.FAILED)
-        
+
         if otp_request == serializer.validated_data.get('otp'):
             order.status = OrderStatus.DELIVERED
             order.save()

@@ -1,5 +1,6 @@
 from rest_framework.permissions import IsAuthenticated
 
+
 def user_permission(role_list):
     class InnerClass(IsAuthenticated):
         def has_permission(self, request, view):

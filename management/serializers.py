@@ -6,29 +6,35 @@ from core.models import (
 )
 from django.db.models import Sum
 
+
 class DeliveryAgentSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username') 
+    username = serializers.CharField(source='user.username')
 
     class Meta:
         model = DeliveryAgent
-        fields = ['id', 'name', 'email', 'phone_number', 'is_blocked', 'is_active', 'username']
+        fields = [
+            'id', 'name', 'email', 'phone_number',
+            'is_blocked', 'is_active', 'username'
+        ]
+
 
 class CustomerSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username') 
+    username = serializers.CharField(source='user.username')
 
     class Meta:
         model = Customer
-        fields =  ['id', 'name', 'email',  'username']
+        fields = ['id', 'name', 'email',  'username']
 
 
 class BlockCustomerSerializer(serializers.ModelSerializer):
+
     class Meta:
-            model = Customer
-            fields =  ['is_blocked', ]
+        model = Customer
+        fields = ['is_blocked', ]
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Order
         fields = ('id', 'total_amount', 'status', 'products')
@@ -43,7 +49,9 @@ class CustomerListSerializer(serializers.ModelSerializer):
         return OrderSerializer(orders, many=True).data
 
     def get_total_gross_amount(self, obj):
-        total_amount = Order.objects.filter(customer_id=obj.id).aggregate(total=Sum('total_amount')).get('total')
+        total_amount = Order.objects.filter(
+            customer_id=obj.id).aggregate(total=Sum('total_amount')
+                                          ).get('total')
         return total_amount if total_amount else 0
 
     class Meta:

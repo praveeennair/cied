@@ -4,6 +4,7 @@ from django.core.validators import MinValueValidator
 from django.contrib.auth.models import User
 from core.constants import OrderStatus
 
+
 class CustomQuerySet(models.query.QuerySet):
     def update(self, *args, **kwargs):
         if 'udate' not in kwargs and self.model._meta.get_field('udate'):
@@ -34,7 +35,9 @@ class TimeStampedModel(models.Model):
 class Product(TimeStampedModel):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200, null=False, blank=False)
-    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.00)])
+    price = models.DecimalField(
+        max_digits=10, decimal_places=2,
+        validators=[MinValueValidator(0.00)])
     # TODO:  Add added_by
 
     class Meta:
@@ -76,6 +79,7 @@ class Order(TimeStampedModel):
     class Meta:
         db_table = 'orders'
 
+
 class OTPRequests(TimeStampedModel):
     id = models.AutoField(primary_key=True)
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
@@ -84,4 +88,3 @@ class OTPRequests(TimeStampedModel):
 
     class Meta:
         db_table = 'otp_request'
-
